@@ -1,42 +1,27 @@
 package com.training.easypay.service;
 
-import com.training.easypay.Exceptions.EmployeeNotFoundException;
 import com.training.easypay.model.Employee;
-import com.training.easypay.model.EmployeeStatus;
-import com.training.easypay.repo.EmployeeRepo;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.training.easypay.model.LeaveRequest;
+import com.training.easypay.model.PayrollData;
 
-import java.awt.*;
 import java.util.List;
-import java.util.Optional;
 
-@Service
-public class EmployeeService {
-    @Autowired
-    private EmployeeRepo repo;
+public interface EmployeeService {
+    Employee save(Employee employee);
 
-    public Employee save(Employee employee) {
-        return repo.save(employee);
-    }
+    List<Employee> findAll();
 
-    public List<Employee> findAll() {
-        return repo.findAll();
-    }
+    Employee findById(Long id);
 
-    public Employee findById(Long id) {
-        return repo.findById(id).orElseThrow(() -> new EmployeeNotFoundException("Employee not found with ID: " + id));
-    }
+    void activateEmployee(Long id);
 
-    public void activateEmployee(Long id){
-        Employee emp = repo.findById(id).orElseThrow(()->new EmployeeNotFoundException("Employee not found with ID: " + id));
-        emp.setStatus(EmployeeStatus.ACTIVE);
-        repo.save(emp);
-    }
+    void deactivateEmployee(Long id);
 
-    public void deactivateEmployee(Long id){
-        Employee emp = repo.findById(id).orElseThrow(()->new EmployeeNotFoundException("Employee not found with ID: " + id));
-        emp.setStatus(EmployeeStatus.INACTIVE);
-        repo.save(emp);
-    }
+    Employee updateEmployee(Employee employee);
+
+    LeaveRequest submitLeaveRequest(LeaveRequest request);
+
+    List<LeaveRequest> getLeaveRequestsByEmployeeId(Long employeeId);
+
+    PayrollData getPayrollData(Long employeeId);
 }
