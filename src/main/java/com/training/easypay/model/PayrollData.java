@@ -13,11 +13,11 @@ public class PayrollData {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @OneToMany
     @JoinColumn(name = "employee_id")
     private Employee employee;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "payroll_id")
     private Payroll payroll;
 }
