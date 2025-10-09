@@ -1,29 +1,30 @@
 package com.training.easypay.service;
 
 import com.training.easypay.Exceptions.EmployeeNotFoundException;
-import com.training.easypay.model.Employee;
-import com.training.easypay.model.EmployeeStatus;
-import com.training.easypay.model.LeaveRequest;
-import com.training.easypay.model.PayrollData;
+import com.training.easypay.model.*;
 import com.training.easypay.repositories.EmployeeRepository;
 import com.training.easypay.repositories.LeaveRequestRepository;
 import com.training.easypay.repositories.PayrollDataRepository;
+import com.training.easypay.repositories.PayrollRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
-public class EmployeeServiceImpl implements EmployeeService{
+public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeRepository repo;
     private final LeaveRequestRepository leaveRequestRepository;
     private final PayrollDataRepository payrollDataRepository;
+    private final PayrollRepository payrollRepository; // Assuming this repository exists
 
     @Autowired
-    public EmployeeServiceImpl(EmployeeRepository repo, LeaveRequestRepository leaveRequestRepository, PayrollDataRepository payrollDataRepository) {
+    public EmployeeServiceImpl(EmployeeRepository repo, LeaveRequestRepository leaveRequestRepository, PayrollDataRepository payrollDataRepository, PayrollRepository payrollRepository) {
         this.repo = repo;
         this.leaveRequestRepository = leaveRequestRepository;
         this.payrollDataRepository = payrollDataRepository;
+        this.payrollRepository = payrollRepository;
     }
 
     @Override
@@ -38,7 +39,7 @@ public class EmployeeServiceImpl implements EmployeeService{
 
     @Override
     public Employee findById(Long id) {
-        return repo.findById(id).orElseThrow(()->new EmployeeNotFoundException("Employee not found."));
+        return repo.findById(id).orElseThrow(() -> new EmployeeNotFoundException("Employee not found."));
     }
 
     @Override
@@ -52,6 +53,7 @@ public class EmployeeServiceImpl implements EmployeeService{
         employee.setStatus(EmployeeStatus.ACTIVE);
         repo.save(employee);
     }
+
     @Override
     public void deactivateEmployee(Long id) {
         Employee employee = findById(id);
@@ -75,7 +77,10 @@ public class EmployeeServiceImpl implements EmployeeService{
     }
 
     @Override
-    public PayrollData getPayrollData(Long employeeId) {
-        return payrollDataRepository.findByEmployeeId(employeeId);
+    public List<Payroll> getPayrollsByEmployeeId(Long employeeId) {
+        List<PayrollData> payrollData = payrollDataRepository.findByEmployeeId(employeeId);
+        return payrollData.stream()
+                .map(PayrollData::getPayroll)
+                .collect(Collectors.toList());
     }
 }
