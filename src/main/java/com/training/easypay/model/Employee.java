@@ -29,6 +29,4 @@ public class Employee {
     private Double salary;
     @Enumerated(EnumType.STRING)
     private EmployeeStatus status = EmployeeStatus.ACTIVE;
-    @OneToMany(mappedBy="employee")
-    private Set<LeaveRequest> leaveRequest;
 }
