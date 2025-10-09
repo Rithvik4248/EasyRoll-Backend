@@ -24,6 +24,10 @@ public class SignupRequest {
     @Size(min = 6, max = 40)
     private String password;
 
+    private String phone;
+
+    private Double salary;
+
     public String getFirstName() {
         return firstName;
     }
@@ -62,5 +66,21 @@ public class SignupRequest {
 
     public void setDesignation(String designation) {
         this.designation = designation;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public Double getSalary() {
+        return salary;
+    }
+
+    public void setSalary(Double salary) {
+        this.salary = salary;
     }
 }

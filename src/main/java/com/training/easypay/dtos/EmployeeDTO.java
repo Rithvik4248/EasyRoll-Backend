@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 public class EmployeeDTO {
+    private Long id; // Added the missing ID field
     private String firstName;
     private String lastName;
     private String email;

@@ -24,7 +24,8 @@ public class Employee {
     private String email;
     private String password;
     private String phone;
-    private String designation;
+    @Enumerated(EnumType.STRING)
+    private Designation designation;
     private Double salary;
     @Enumerated(EnumType.STRING)
     private EmployeeStatus status = EmployeeStatus.ACTIVE;

@@ -28,7 +28,11 @@ public class UserDetailsImpl implements UserDetails {
     }
 
     public static UserDetailsImpl build(Employee employee) {
-        List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(employee.getDesignation()));
+        String role = "EMPLOYEE"; // Default role
+        if (employee.getDesignation() != null) {
+            role = employee.getDesignation().name();
+        }
+        List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(role));
 
         return new UserDetailsImpl(
                 employee.getId(),

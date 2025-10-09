@@ -1,6 +1,8 @@
 package com.training.easypay.controller;
 
+import com.training.easypay.model.Designation;
 import com.training.easypay.model.Employee;
+import com.training.easypay.model.EmployeeStatus;
 import com.training.easypay.payload.JwtResponse;
 import com.training.easypay.payload.LoginRequest;
 import com.training.easypay.payload.MessageResponse;
@@ -63,13 +65,26 @@ public class AuthController {
                     .body(new MessageResponse("Error: Email is already in use!"));
         }
 
-        // Create new user's account
-        Employee employee = new Employee();
-        employee.setFirstName(signUpRequest.getFirstName());
-        employee.setLastName(signUpRequest.getLastName());
-        employee.setEmail(signUpRequest.getEmail());
-        employee.setPassword(encoder.encode(signUpRequest.getPassword()));
-        employee.setDesignation(signUpRequest.getDesignation());
+        Designation designation;
+        try {
+            designation = Designation.valueOf(signUpRequest.getDesignation().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid designation!"));
+        }
+
+        // Using the @AllArgsConstructor from Lombok to ensure all fields are set.
+        // This is the most direct way to create the entity and should be the most reliable.
+        Employee employee = new Employee(
+                null, // id is auto-generated
+                signUpRequest.getFirstName(),
+                signUpRequest.getLastName(),
+                signUpRequest.getEmail(),
+                encoder.encode(signUpRequest.getPassword()),
+                signUpRequest.getPhone(),
+                designation,
+                signUpRequest.getSalary(),
+                EmployeeStatus.ACTIVE // Explicitly set the default status
+        );
 
         employeeRepository.save(employee);
 
