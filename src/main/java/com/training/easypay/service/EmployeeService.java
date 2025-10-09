@@ -13,6 +13,8 @@ public interface EmployeeService {
 
     Employee findById(Long id);
 
+    Employee findByEmail(String email);
+
     void activateEmployee(Long id);
 
     void deactivateEmployee(Long id);

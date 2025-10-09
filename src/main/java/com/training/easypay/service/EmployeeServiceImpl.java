@@ -40,6 +40,12 @@ public class EmployeeServiceImpl implements EmployeeService{
     public Employee findById(Long id) {
         return repo.findById(id).orElseThrow(()->new EmployeeNotFoundException("Employee not found."));
     }
+
+    @Override
+    public Employee findByEmail(String email) {
+        return repo.findByEmail(email).orElseThrow(() -> new EmployeeNotFoundException("Employee not found with email: " + email));
+    }
+
     @Override
     public void activateEmployee(Long id) {
         Employee employee = findById(id);

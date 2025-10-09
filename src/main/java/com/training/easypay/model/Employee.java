@@ -22,6 +22,7 @@ public class Employee {
     private String lastName;
     @Column(nullable = false, unique = true)
     private String email;
+    private String password;
     private String phone;
     private String designation;
     private Double salary;
