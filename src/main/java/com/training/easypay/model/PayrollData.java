@@ -17,7 +17,7 @@ public class PayrollData {
     @JoinColumn(name = "employee_id")
     private Employee employee;
 
-    @ManyToOne(cascade = {CascadeType.PERSIST,CascadeType.MERGE,CascadeType.REFRESH})
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "payroll_id")
     private Payroll payroll;
 }
