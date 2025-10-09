@@ -7,6 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface ManagerService {
-    Map<Long, List<PayrollData>> getGroupedAndSortedPayrollData();
-    LeaveRequest updateLeaveRequestStatus(Long leaveRequestId, String status, String reason);
+    List<PayrollData> getGroupedAndSortedPayrollData();
+    LeaveRequest updateLeaveRequestStatus(Long leaveRequestId, String status);
 }
