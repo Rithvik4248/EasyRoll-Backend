@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Entity
 @Table(name = "employees")
 @Getter
@@ -27,4 +29,7 @@ public class Employee {
     private Double salary;
     @Enumerated(EnumType.STRING)
     private EmployeeStatus status = EmployeeStatus.ACTIVE;
+    @OneToMany(mappedBy = "employee")
+    private Set<LeaveRequest> leaveRequest;
+
 }
