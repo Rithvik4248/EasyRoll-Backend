@@ -2,6 +2,11 @@ package com.training.easypay.service;
 
 import com.training.easypay.model.Payroll;
 
+import java.util.List;
+
 public interface PayrollService {
-    Payroll calculatePayroll(Long employeeId, int month, int year);
+
+    List<Payroll> calculatePayrollForPeriod(String payPeriod);
+
+    void processPaymentsForPeriod(String payPeriod);
 }

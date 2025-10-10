@@ -1,65 +1,72 @@
 package com.training.easypay.service;
 
+import com.training.easypay.exceptions.ResourceNotFoundException;
 import com.training.easypay.model.Employee;
-import com.training.easypay.model.LeaveRequest;
 import com.training.easypay.model.Payroll;
-import com.training.easypay.model.PayrollData;
+import com.training.easypay.model.PayrollPolicy;
 import com.training.easypay.repositories.EmployeeRepository;
-import com.training.easypay.repositories.LeaveRequestRepository;
-import com.training.easypay.repositories.PayrollDataRepository;
+import com.training.easypay.repositories.PayrollRepository;
+import com.training.easypay.repositories.PayrollPolicyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class PayrollServiceImpl implements PayrollService {
 
-    @Autowired
-    private EmployeeRepository employeeRepository;
+    private final EmployeeRepository employeeRepository;
+    private final PayrollRepository payrollRepository;
+    private final PayrollPolicyRepository payrollPolicyRepository;
 
     @Autowired
-    private LeaveRequestRepository leaveRequestRepository;
-
-    @Autowired
-    private PayrollDataRepository payrollDataRepository;
+    public PayrollServiceImpl(EmployeeRepository employeeRepository, PayrollRepository payrollRepository, PayrollPolicyRepository payrollPolicyRepository) {
+        this.employeeRepository = employeeRepository;
+        this.payrollRepository = payrollRepository;
+        this.payrollPolicyRepository = payrollPolicyRepository;
+    }
 
     @Override
-    public Payroll calculatePayroll(Long employeeId, int month, int year) {
-        Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
+    public List<Payroll> calculatePayrollForPeriod(String payPeriod) {
+        // Assume there is one global payroll policy. Fetch the first one found.
+        PayrollPolicy policy = payrollPolicyRepository.findAll().stream().findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("No Payroll Policy has been defined. Please create a policy first."));
 
-        List<LeaveRequest> leaveRequests = leaveRequestRepository.findByEmployeeId(employeeId);
+        List<Employee> employees = employeeRepository.findAll();
+        List<Payroll> payrolls = new ArrayList<>();
 
-        List<LeaveRequest> monthlyLeaveRequests = leaveRequests.stream()
-                .filter(lr -> lr.getStartDate().getMonthValue() == month && lr.getStartDate().getYear() == year)
-                .collect(Collectors.toList());
+        for (Employee employee : employees) {
+            double basicSalary = employee.getSalary();
+            double hra = basicSalary * (policy.getHraPercentage() / 100);
+            double allowances = basicSalary * (policy.getAllowancesPercentage() / 100);
+            double taxDeduction = basicSalary * (policy.getTaxPercentage() / 100);
 
-        int leaveDays = monthlyLeaveRequests.stream()
-                .mapToInt(lr -> lr.getEndDate().getDayOfMonth() - lr.getStartDate().getDayOfMonth() + 1)
-                .sum();
+            double netPay = basicSalary + hra + allowances - taxDeduction;
 
-        double monthlySalary = employee.getSalary();
-        double perDaySalary = monthlySalary / 30;
-        double deduction = perDaySalary * leaveDays;
-        double netSalary = monthlySalary - deduction;
+            Payroll payroll = new Payroll();
+            payroll.setEmployeeId(employee.getId());
+            payroll.setBasicSalary(basicSalary);
+            payroll.setHra(hra);
+            payroll.setAllowances(allowances);
+            payroll.setDeductions(taxDeduction);
+            payroll.setNetPay(netPay);
+            payroll.setPayPeriod(payPeriod);
+            payroll.setPaymentDate(LocalDate.now()); // Or a specific date for the period
 
-        Payroll payroll = new Payroll();
-        payroll.setBasicSalary(monthlySalary);
-        payroll.setDeductions(deduction);
-        payroll.setNetPay(netSalary);
-        payroll.setPayPeriod(YearMonth.of(year, month).toString());
-        payroll.setPaymentDate(LocalDate.now());
+            payrolls.add(payrollRepository.save(payroll));
+        }
 
-        PayrollData payrollData = new PayrollData();
-        payrollData.setEmployee(employee);
-        payrollData.setPayroll(payroll);
+        return payrolls;
+    }
 
-        PayrollData savedPayrollData = payrollDataRepository.save(payrollData);
-
-        return savedPayrollData.getPayroll();
+    @Override
+    public void processPaymentsForPeriod(String payPeriod) {
+        // This is a placeholder for a more complex payment processing logic.
+        // In a real system, this would integrate with a payment gateway or accounting system.
+        List<Payroll> payrollsToProcess = payrollRepository.findByPayPeriod(payPeriod);
+        System.out.println("Processing payments for " + payrollsToProcess.size() + " employees for the period: " + payPeriod);
+        // Here, you would change the status of payrolls to 'PAID', for example.
     }
 }
